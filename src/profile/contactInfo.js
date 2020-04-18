@@ -12,8 +12,8 @@ const template = {
       isMultipleFields: true
     }
   }
-} 
-const getContactInfo = async(page) => {
+}
+const getContactInfo = async (page) => {
   await page.waitFor(showSelector, { timeout: 2000 })
     .catch(() => {
       logger.warn('contact-info', 'selector not found')
@@ -22,8 +22,8 @@ const getContactInfo = async(page) => {
 
   const element = await page.$(showSelector)
   await element.click()
-  await new Promise((resolve) => { setTimeout(() => { resolve() }, 500)})
-  
+  await new Promise((resolve) => { setTimeout(() => { resolve() }, 500) })
+
   const contactInfo = await scrapSection(page, template)
 
   return contactInfo
