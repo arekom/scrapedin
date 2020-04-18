@@ -12,7 +12,7 @@ module.exports = async (page) => {
       visible: true,
       timeout: TIMEOUT_BETWEEN_SCROLLS
     }).catch(() => {
-      logger.info('scrollToPageBottom', `scrolling to page bottom (${i + 1})`)
+      // logger.info('scrollToPageBottom', `scrolling to page bottom (${i + 1})`)
     })
 
     if (hasReachedEnd) {

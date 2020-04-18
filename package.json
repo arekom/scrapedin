@@ -23,6 +23,7 @@
   "author": "Wagner Leonardi <leonardiwagner@gmail.com>",
   "license": "Apache-2.0",
   "dependencies": {
+    "cheerio": "^1.0.0-rc.3",
     "puppeteer": "^1.13.0",
     "winston": "^3.1.0"
   },

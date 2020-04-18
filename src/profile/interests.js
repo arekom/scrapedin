@@ -1,3 +1,5 @@
+const cheerio = require('cheerio');
+
 const logger = require('scrapedin/src/logger')
 
 const showSelector = 'a[data-control-name=view_interest_details]'
