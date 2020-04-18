@@ -3,18 +3,19 @@ const scrapSection = require('../scrapSection')
 const scrollToPageBottom = require('./scrollToPageBottom')
 const seeMoreButtons = require('./seeMoreButtons')
 const contactInfo = require('./contactInfo')
+const interestsInfo = require('./interests')
 const template = require('./profileScraperTemplate')
 const cleanProfileData = require('./cleanProfileData')
 
 const logger = require('../logger')
 
-module.exports = async (browser, cookies, url, waitTimeToScrapMs = 500, hasToGetContactInfo = false, puppeteerAuthenticate = undefined) => {
+module.exports = async (browser, cookies, url, waitTimeToScrapMs = 500, hasToGetContactInfo = true, puppeteerAuthenticate = undefined) => {
   logger.info('profile', `starting scraping url: ${url}`)
 
   const page = await openPage({ browser, cookies, url, puppeteerAuthenticate })
   const profilePageIndicatorSelector = '.pv-profile-section'
 
-  await page.waitFor(profilePageIndicatorSelector, { timeout: 5000 })
+  await page.waitFor(profilePageIndicatorSelector, { timeout: 500 })
     .catch(() => {
       logger.warn('profile', 'profile selector was not found')
     })
@@ -22,20 +23,21 @@ module.exports = async (browser, cookies, url, waitTimeToScrapMs = 500, hasToGet
   logger.info('profile', 'scrolling page to the bottom')
   await scrollToPageBottom(page)
 
-  if(waitTimeToScrapMs) {
+  if (waitTimeToScrapMs) {
     logger.info('profile', `applying 1st delay`)
-    await new Promise((resolve) => { setTimeout(() => { resolve() }, waitTimeToScrapMs / 2)})
+    await new Promise((resolve) => { setTimeout(() => { resolve() }, waitTimeToScrapMs / 2) })
   }
 
   logger.info('profile', 'clicking on see more buttons')
   await seeMoreButtons.clickAll(page)
 
-  if(waitTimeToScrapMs) {
+  if (waitTimeToScrapMs) {
     logger.info('profile', `applying 2nd delay`)
-    await new Promise((resolve) => { setTimeout(() => { resolve() }, waitTimeToScrapMs / 2)})
+    await new Promise((resolve) => { setTimeout(() => { resolve() }, waitTimeToScrapMs / 2) })
   }
 
-  const contact = hasToGetContactInfo ? await contactInfo(page) : {}
+  const interests = await interestsInfo(page)
+  const contact = await contactInfo(page)
   const [profileLegacy] = await scrapSection(page, template.profileLegacy)
   const [profileAlternative] = await scrapSection(page, template.profileAlternative)
   const [aboutLegacy] = await scrapSection(page, template.aboutLegacy)
@@ -70,7 +72,8 @@ module.exports = async (browser, cookies, url, waitTimeToScrapMs = 500, hasToGet
     },
     accomplishments,
     peopleAlsoViewed,
-    volunteerExperience
+    volunteerExperience,
+    interests
   }
 
   const cleanedProfile = cleanProfileData(rawProfile)
