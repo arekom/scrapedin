@@ -1,9 +1,9 @@
 const openPage = require('../openPage')
 const scrapSection = require('../scrapSection')
 const scrollToPageBottom = require('./scrollToPageBottom')
-// const seeMoreButtons = require('./seeMoreButtons')
 const contactInfo = require('./contactInfo')
 const interestsInfo = require('./interests')
+const activityInfo = require('./activity')
 const template = require('./profileScraperTemplate')
 const cleanProfileData = require('./cleanProfileData')
 
@@ -27,21 +27,20 @@ module.exports = async (browser, cookies, url, waitTimeToScrapMs = 0, hasToGetCo
     await new Promise((resolve) => { setTimeout(() => { resolve() }, waitTimeToScrapMs / 2) })
   }
 
-  // logger.info('profile', 'clicking on see more buttons')
-  // await seeMoreButtons.clickAll(page)
-
   if (waitTimeToScrapMs) {
     logger.info('profile', `applying 2nd delay`)
     await new Promise((resolve) => { setTimeout(() => { resolve() }, waitTimeToScrapMs / 2) })
   }
 
+  const interests_results = await interestsInfo(page)
   const interests = {
-    groups: await interestsInfo(page)
+    groups: interests_results.groups,
+    companies: interests_results.companies,
+    influencers: interests_results.influencers,
+    schools: interests_results.schools
   }
   const contact = await contactInfo(page)
-  // const [profileLegacy] = await scrapSection(page, template.profileLegacy)
   const [profileAlternative] = await scrapSection(page, template.profileAlternative)
-  // const [aboutLegacy] = await scrapSection(page, template.aboutLegacy)
   const [aboutAlternative] = await scrapSection(page, template.aboutAlternative)
   const positions = await scrapSection(page, template.positions)
   const educations = await scrapSection(page, template.educations)
@@ -53,14 +52,14 @@ module.exports = async (browser, cookies, url, waitTimeToScrapMs = 0, hasToGetCo
   const volunteerExperience = await scrapSection(page, template.volunteerExperience)
   const peopleAlsoViewed = await scrapSection(page, template.peopleAlsoViewed)
 
+  const activity = await activityInfo(page, url)
+
   await page.close()
   logger.info('profile', `finished scraping url: ${url}`)
 
   const rawProfile = {
     contact,
-    // profileLegacy,
     profileAlternative,
-    // aboutLegacy,
     aboutAlternative,
     positions,
     educations,
@@ -74,7 +73,8 @@ module.exports = async (browser, cookies, url, waitTimeToScrapMs = 0, hasToGetCo
     accomplishments,
     peopleAlsoViewed,
     volunteerExperience,
-    interests
+    interests,
+    activity
   }
 
   const cleanedProfile = cleanProfileData(rawProfile)
